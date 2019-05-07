@@ -2,7 +2,7 @@
 
 namespace tests\models;
 
-use mohorev\file\UploadImageBehavior;
+use h0rseduck\file\UploadImageBehavior;
 use yii\db\ActiveRecord;
 
 /**

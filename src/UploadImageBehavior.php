@@ -1,6 +1,6 @@
 <?php
 
-namespace mohorev\file;
+namespace h0rseduck\file;
 
 use Imagine\Image\ManipulatorInterface;
 use Yii;
@@ -19,7 +19,7 @@ use yii\imagine\Image;
  * To use UploadImageBehavior, insert the following code to your ActiveRecord class:
  *
  * ```php
- * use mohorev\file\UploadImageBehavior;
+ * use h0rseduck\file\UploadImageBehavior;
  *
  * function behaviors()
  * {
@@ -44,6 +44,7 @@ use yii\imagine\Image;
  *
  * @author Alexander Mohorev <dev.mohorev@gmail.com>
  * @author Alexey Samoylov <alexey.samoylov@gmail.com>
+ * @author H0rse Duck <thenewsit@gmail.com>
  */
 class UploadImageBehavior extends UploadBehavior
 {
@@ -101,17 +102,6 @@ class UploadImageBehavior extends UploadBehavior
             }
             if ($this->thumbUrl === null) {
                 $this->thumbUrl = $this->url;
-            }
-
-            foreach ($this->thumbs as $config) {
-                $width = ArrayHelper::getValue($config, 'width');
-                $height = ArrayHelper::getValue($config, 'height');
-                if ($height < 1 && $width < 1) {
-                    throw new InvalidConfigException(sprintf(
-                        'Length of either side of thumb cannot be 0 or negative, current size ' .
-                        'is %sx%s', $width, $height
-                    ));
-                }
             }
         }
     }
@@ -246,17 +236,26 @@ class UploadImageBehavior extends UploadBehavior
     }
 
     /**
-     * @param $config
-     * @param $path
-     * @param $thumbPath
+     * @param array $config
+     * @param string $path
+     * @param string $thumbPath
+     * @throws InvalidConfigException
      */
     protected function generateImageThumb($config, $path, $thumbPath)
     {
-        $width = ArrayHelper::getValue($config, 'width');
-        $height = ArrayHelper::getValue($config, 'height');
-        $quality = ArrayHelper::getValue($config, 'quality', 100);
-        $mode = ArrayHelper::getValue($config, 'mode', ManipulatorInterface::THUMBNAIL_INSET);
-        $bg_color = ArrayHelper::getValue($config, 'bg_color', 'FFF');
+        $width = $this->getConfigValue($config, 'width');
+        $height = $this->getConfigValue($config, 'height');
+
+        if ($height < 1 && $width < 1) {
+            throw new InvalidConfigException(sprintf(
+                'Length of either side of thumb cannot be 0 or negative, current size ' .
+                'is %sx%s', $width, $height
+            ));
+        }
+
+        $quality = $this->getConfigValue($config, 'quality', 100);
+        $mode = $this->getConfigValue($config, 'mode', ManipulatorInterface::THUMBNAIL_INSET);
+        $bg_color = $this->getConfigValue($config, 'bg_color', 'FFF');
 
         if (!$width || !$height) {
             $image = Image::getImagine()->open($path);
@@ -272,5 +271,20 @@ class UploadImageBehavior extends UploadBehavior
         ini_set('memory_limit', '512M');
         Image::$thumbnailBackgroundColor = $bg_color;
         Image::thumbnail($path, $width, $height, $mode)->save($thumbPath, ['quality' => $quality]);
+    }
+
+    /**
+     * @param array $config
+     * @param string $attribute
+     * @param mixed|null $default
+     * @return mixed
+     */
+    private function getConfigValue($config, $attribute, $default = null)
+    {
+        $value = ArrayHelper::getValue($config, $attribute, $default);
+        if($value instanceof \Closure) {
+            $value = call_user_func($value, $this->owner);
+        }
+        return $value;
     }
 }

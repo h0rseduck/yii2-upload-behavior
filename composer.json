@@ -1,18 +1,22 @@
 {
-    "name": "mohorev/yii2-upload-behavior",
+    "name": "h0rseduck/yii2-upload-behavior",
     "description": "Upload behavior for Yii 2",
     "keywords": ["yii2", "extension", "behavior", "file", "image", "upload", "resize", "thumb"],
-    "homepage": "https://github.com/mohorev/yii2-upload-behavior",
+    "homepage": "https://github.com/h0rseduck/yii2-upload-behavior",
     "type": "yii2-extension",
     "license": "BSD-3-Clause",
     "support": {
-        "issues": "https://github.com/mohorev/yii2-upload-behavior/issues?state=open",
-        "source": "https://github.com/mohorev/yii2-upload-behavior"
+        "issues": "https://github.com/h0rseduck/yii2-upload-behavior/issues?state=open",
+        "source": "https://github.com/h0rseduck/yii2-upload-behavior"
     },
     "authors": [
         {
             "name": "Alexander Mohorev",
             "email": "dev.mohorev@gmail.com"
+        },
+        {
+            "name": "H0rse Duck",
+            "email": "thenewsit@gmail.com"
         }
     ],
     "repositories": [
@@ -23,7 +27,8 @@
     ],
     "require": {
         "php": ">=5.6.0",
-        "yiisoft/yii2": "~2.0.0"
+        "yiisoft/yii2": "~2.0.0",
+        "yiisoft/yii2-imagine": "~2.1.0"
     },
     "require-dev": {
       "phpunit/phpunit": "~4.0",
@@ -35,7 +40,7 @@
     },
     "autoload": {
         "psr-4": {
-            "mohorev\\file\\": "src"
+            "h0rseduck\\file\\": "src"
         }
     }
 }
