@@ -49,36 +49,44 @@ class UploadBehavior extends Behavior
      * @var string the attribute which holds the attachment.
      */
     public $attribute;
+
     /**
      * @var array the scenarios in which the behavior will be triggered
      */
     public $scenarios = [];
+
     /**
      * @var string the base path or path alias to the directory in which to save files.
      */
     public $path;
+
     /**
      * @var string the base URL or path alias for this file
      */
     public $url;
+
     /**
      * @var bool Getting file instance by name
      */
     public $instanceByName = false;
+
     /**
      * @var boolean|callable generate a new unique name for the file
      * set true or anonymous function takes the old filename and returns a new name.
      * @see self::generateFileName()
      */
     public $generateNewName = true;
+
     /**
      * @var boolean If `true` current attribute file will be deleted
      */
     public $unlinkOnSave = true;
+
     /**
      * @var boolean If `true` current attribute file will be deleted after model deletion.
      */
     public $unlinkOnDelete = true;
+
     /**
      * @var boolean $deleteTempFile whether to delete the temporary file after saving.
      */
@@ -89,9 +97,9 @@ class UploadBehavior extends Behavior
      */
     private $_file;
 
-
     /**
      * @inheritdoc
+     * @throws InvalidConfigException
      */
     public function init()
     {
@@ -178,6 +186,7 @@ class UploadBehavior extends Behavior
     /**
      * This method is called at the end of inserting or updating a record.
      * @throws \yii\base\InvalidArgumentException
+     * @throws \yii\base\Exception
      */
     public function afterSave()
     {

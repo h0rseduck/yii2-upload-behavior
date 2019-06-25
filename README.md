@@ -2,12 +2,12 @@ Upload behavior for Yii 2
 ===========================
 
 This behavior automatically uploads file and fills the specified attribute with a value of the name of the uploaded file.
-This code is inspired by, but not derived from, https://github.com/yii-dream-team/yii2-upload-behavior.
+This code is inspired by, but not derived from, https://github.com/mohorev/yii2-upload-behavior.
 
-[![Latest Version](https://img.shields.io/packagist/v/mohorev/yii2-upload-behavior.svg?style=flat-square)](https://packagist.org/packages/mohorev/yii2-upload-behavior)
+[![Latest Version](https://img.shields.io/packagist/v/h0rseduck/yii2-upload-behavior.svg?style=flat-square)](https://packagist.org/packages/h0rseduck/yii2-upload-behavior)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
-[![Build Status](https://img.shields.io/travis/mohorev/yii2-upload-behavior/master.svg?style=flat-square)](https://travis-ci.org/mohorev/yii2-upload-behavior)
-[![Quality Score](https://img.shields.io/scrutinizer/g/mohorev/yii2-upload-behavior.svg?style=flat-square)](https://scrutinizer-ci.com/g/mohorev/yii2-upload-behavior)
+[![Build Status](https://img.shields.io/travis/h0rseduck/yii2-upload-behavior/master.svg?style=flat-square)](https://travis-ci.org/h0rseduck/yii2-upload-behavior)
+[![Quality Score](https://img.shields.io/scrutinizer/g/h0rseduck/yii2-upload-behavior.svg?style=flat-square)](https://scrutinizer-ci.com/g/h0rseduck/yii2-upload-behavior)
 
 Installation
 ------------
@@ -17,13 +17,13 @@ The preferred way to install this extension via [composer](http://getcomposer.or
 Either run
 
 ```
-php composer.phar require --prefer-dist mohorev/yii2-upload-behavior "*"
+php composer.phar require --prefer-dist h0rseduck/yii2-upload-behavior "*"
 ```
 
 or add this code line to the `require` section of your `composer.json` file:
 
 ```json
-"mohorev/yii2-upload-behavior": "*"
+"h0rseduck/yii2-upload-behavior": "*"
 ```
 
 Usage
@@ -126,7 +126,7 @@ class User extends ActiveRecord
     {
         return [
             [
-                'class' => \mohorev\file\UploadImageBehavior::class,
+                'class' => \h0rseduck\file\UploadImageBehavior::class,
                 'attribute' => 'image',
                 'scenarios' => ['insert', 'update'],
                 'placeholder' => '@app/modules/user/assets/images/userpic.jpg',

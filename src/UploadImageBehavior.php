@@ -2,6 +2,7 @@
 
 namespace h0rseduck\file;
 
+use Imagine\Image\ImageInterface;
 use Imagine\Image\ManipulatorInterface;
 use Yii;
 use yii\base\InvalidArgumentException;
@@ -33,6 +34,7 @@ use yii\imagine\Image;
  *             'url' => '@web/upload/{id}/images',
  *             'thumbPath' => '@webroot/upload/{id}/images/thumb',
  *             'thumbUrl' => '@web/upload/{id}/images/thumb',
+ *             'autorotate' => true,
  *             'thumbs' => [
  *                   'thumb' => ['width' => 400, 'quality' => 90],
  *                   'preview' => ['width' => 200, 'height' => 200],
@@ -52,20 +54,30 @@ class UploadImageBehavior extends UploadBehavior
      * @var string
      */
     public $placeholder;
+
     /**
      * @var boolean
      */
     public $createThumbsOnSave = true;
+
     /**
      * @var boolean
      */
     public $createThumbsOnRequest = false;
+
+    /**
+     * Rotates an image automatically based on EXIF information.
+     * @var boolean
+     */
+    public $autorotate = false;
+
     /**
      * Whether delete original uploaded image after thumbs generating.
      * Defaults to FALSE
      * @var boolean
      */
     public $deleteOriginalFile = false;
+
     /**
      * @var array the thumbnail profiles
      * - `width`
@@ -75,18 +87,26 @@ class UploadImageBehavior extends UploadBehavior
     public $thumbs = [
         'thumb' => ['width' => 200, 'height' => 200, 'quality' => 90],
     ];
+
     /**
      * @var string|null
      */
     public $thumbPath;
+
     /**
      * @var string|null
      */
     public $thumbUrl;
 
+    /**
+     * @var ImageInterface
+     */
+    private $originalImage;
 
     /**
      * @inheritdoc
+     * @throws NotSupportedException
+     * @throws InvalidConfigException
      */
     public function init()
     {
@@ -108,25 +128,31 @@ class UploadImageBehavior extends UploadBehavior
 
     /**
      * @inheritdoc
+     * @throws InvalidConfigException
+     * @throws \yii\base\Exception
      */
     protected function afterUpload()
     {
         parent::afterUpload();
-        if ($this->createThumbsOnSave) {
-            $this->createThumbs();
+        $path = $this->getPathOriginalImage();
+        if ($path) {
+            $this->originalImage = Image::getImagine()->open($path);
+            if ($this->autorotate) {
+                Image::autorotate($this->originalImage)->save($path);
+            }
+            if ($this->createThumbsOnSave) {
+                $this->createThumbs($path);
+            }
         }
     }
 
     /**
-     * @throws \yii\base\InvalidArgumentException
+     * @param $path
+     * @throws InvalidConfigException
+     * @throws \yii\base\Exception
      */
-    protected function createThumbs()
+    protected function createThumbs($path)
     {
-        $path = $this->getUploadPath($this->attribute);
-        if (!is_file($path)) {
-            return;
-        }
-        
         foreach ($this->thumbs as $profile => $config) {
             $thumbPath = $this->getThumbUploadPath($this->attribute, $profile);
             if ($thumbPath !== null) {
@@ -140,7 +166,7 @@ class UploadImageBehavior extends UploadBehavior
                 }
             }
         }
-        
+
         if ($this->deleteOriginalFile) {
             parent::delete($this->attribute);
         }
@@ -159,7 +185,7 @@ class UploadImageBehavior extends UploadBehavior
         $path = $this->resolvePath($this->thumbPath);
         $attribute = ($old === true) ? $model->getOldAttribute($attribute) : $model->$attribute;
         $filename = $this->getThumbFileName($attribute, $profile);
-        
+
         return $filename ? Yii::getAlias($path . '/' . $filename) : null;
     }
 
@@ -167,16 +193,18 @@ class UploadImageBehavior extends UploadBehavior
      * @param string $attribute
      * @param string $profile
      * @return string|null
+     * @throws InvalidConfigException
+     * @throws \yii\base\Exception
      */
     public function getThumbUploadUrl($attribute, $profile = 'thumb')
     {
         /** @var BaseActiveRecord $model */
         $model = $this->owner;
-        
-        if ($this->createThumbsOnRequest) {
-            $this->createThumbs();
+        $path = $this->getPathOriginalImage();
+        if ($path && $this->createThumbsOnRequest) {
+            $this->createThumbs($path);
         }
-        
+
         if (is_file($this->getThumbUploadPath($attribute, $profile))) {
             $url = $this->resolvePath($this->thumbUrl);
             $fileName = $model->getOldAttribute($attribute);
@@ -193,6 +221,7 @@ class UploadImageBehavior extends UploadBehavior
     /**
      * @param $profile
      * @return string
+     * @throws InvalidConfigException
      */
     protected function getPlaceholderUrl($profile)
     {
@@ -258,8 +287,7 @@ class UploadImageBehavior extends UploadBehavior
         $bg_color = $this->getConfigValue($config, 'bg_color', 'FFF');
 
         if (!$width || !$height) {
-            $image = Image::getImagine()->open($path);
-            $ratio = $image->getSize()->getWidth() / $image->getSize()->getHeight();
+            $ratio = $this->originalImage->getSize()->getWidth() / $this->originalImage->getSize()->getHeight();
             if ($width) {
                 $height = ceil($width / $ratio);
             } else {
@@ -282,9 +310,21 @@ class UploadImageBehavior extends UploadBehavior
     private function getConfigValue($config, $attribute, $default = null)
     {
         $value = ArrayHelper::getValue($config, $attribute, $default);
-        if($value instanceof \Closure) {
+        if ($value instanceof \Closure) {
             $value = call_user_func($value, $this->owner);
         }
         return $value;
+    }
+
+    /**
+     * @return bool|string
+     */
+    private function getPathOriginalImage()
+    {
+        $path = $this->getUploadPath($this->attribute);
+        if (!$path || !is_file($path)) {
+            return false;
+        }
+        return $path;
     }
 }
