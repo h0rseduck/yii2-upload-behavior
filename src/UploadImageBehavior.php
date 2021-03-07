@@ -2,6 +2,7 @@
 
 namespace h0rseduck\file;
 
+use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ManipulatorInterface;
 use Yii;
@@ -295,10 +296,20 @@ class UploadImageBehavior extends UploadBehavior
             }
         }
 
+        $processor = ArrayHelper::getValue($config, 'processor');
+        if (!$processor || !is_callable($processor)) {
+            $processor = function (ImageInterface $thumb) use ($width, $height, $mode) {
+                $thumb->thumbnail(new Box($width, $height), $mode);
+            };
+        }
+
         // Fix error "PHP GD Allowed memory size exhausted".
         ini_set('memory_limit', '512M');
         Image::$thumbnailBackgroundColor = $bg_color;
-        Image::thumbnail($path, $width, $height, $mode)->save($thumbPath, ['quality' => $quality]);
+
+        $thumb = clone $this->originalImage;
+        call_user_func($processor, $thumb);
+        $thumb->save($thumbPath, ['quality' => $quality]);
     }
 
     /**
