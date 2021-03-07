@@ -299,7 +299,7 @@ class UploadImageBehavior extends UploadBehavior
         $processor = ArrayHelper::getValue($config, 'processor');
         if (!$processor || !is_callable($processor)) {
             $processor = function (ImageInterface $thumb, $width, $height, $mode) {
-                $thumb->thumbnail(new Box($width, $height), $mode);
+                return Image::thumbnail($thumb, $width, $height, $mode);
             };
         }
 
@@ -308,7 +308,7 @@ class UploadImageBehavior extends UploadBehavior
         Image::$thumbnailBackgroundColor = $bg_color;
 
         $thumb = clone $this->originalImage;
-        call_user_func($processor, $thumb, $width, $height, $mode);
+        $thumb = call_user_func($processor, $thumb, $width, $height, $mode);
         $thumb->save($thumbPath, ['quality' => $quality]);
     }
 
