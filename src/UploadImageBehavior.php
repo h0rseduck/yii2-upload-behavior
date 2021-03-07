@@ -308,7 +308,7 @@ class UploadImageBehavior extends UploadBehavior
         Image::$thumbnailBackgroundColor = $bg_color;
 
         $thumb = clone $this->originalImage;
-        call_user_func($processor, $thumb);
+        call_user_func($processor, $thumb, $width, $height, $mode);
         $thumb->save($thumbPath, ['quality' => $quality]);
     }
 
