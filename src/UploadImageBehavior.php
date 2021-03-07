@@ -298,7 +298,7 @@ class UploadImageBehavior extends UploadBehavior
 
         $processor = ArrayHelper::getValue($config, 'processor');
         if (!$processor || !is_callable($processor)) {
-            $processor = function (ImageInterface $thumb) use ($width, $height, $mode) {
+            $processor = function (ImageInterface $thumb, $width, $height, $mode) {
                 $thumb->thumbnail(new Box($width, $height), $mode);
             };
         }
