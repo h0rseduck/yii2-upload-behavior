@@ -307,7 +307,7 @@ class UploadImageBehavior extends UploadBehavior
         ini_set('memory_limit', '512M');
         Image::$thumbnailBackgroundColor = $bg_color;
 
-        $thumb = clone $this->originalImage;
+        $thumb = Image::getImagine()->open($path);
         $thumb = call_user_func($processor, $thumb, $width, $height, $mode);
         $thumb->save($thumbPath, ['quality' => $quality]);
     }
